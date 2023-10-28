@@ -1,22 +1,34 @@
 #!/usr/bin/python
 
-'''
+"""
 USAGE: # ./sub-dax.py $RUN_DIR > sub-pipeline.dax
-'''
+"""
 
-'''
+"""
 NOTE:
 - Comment out SISTR dependency line at the end if non-Salmonella organism is used.
-'''
+"""
 
 import sys
 import os
 
-# Import the Python DAX library
-os.sys.path.insert(0, "/util/opt/pegasus-wms/5.0/lib64/pegasus/externals/python/")
-from Pegasus.DAX3 import *
+from Pegasus.api import (
+    Workflow,
+    TransformationCatalog,
+    ReplicaCatalog,
+    SiteCatalog,
+    File,
+    Job,
+    Transformation,
+    Namespace,
+    OS,
+    Arch,
+)
 
-dax = ADAG("pipeline")
+dax = Workflow("pipeline")
+tc = TransformationCatalog()
+rc = ReplicaCatalog()
+sc = SiteCatalog()
 base_dir = os.getcwd()
 
 run_dir = sys.argv[1]
@@ -32,45 +44,57 @@ list_of_sistr_files = []
 
 # Get list of contigs after filtering
 for file_name in os.listdir(run_dir):
-    filee = File(file_name)
-    filee.addPFN(PFN("file://{0}/".format(run_dir) + str(file_name), "local-hcc"))
-    dax.addFile(filee)
-    list_of_contig_files.append(filee)
+    rc.add_replica("local-hcc", file_name, f"file://{run_dir}/{file_name}")
+    list_of_contig_files.append(File(file_name))
 
 
 i = 0
 for output_filtering_contigs in list_of_contig_files:
+    srr_id = output_filtering_contigs.lfn.split("_")[0]
 
-    srr_id = output_filtering_contigs.name.split("_")[0]
-		
     # add job for Prokka
     prokka_run.append(Job("ex_prokka_run"))
-    prokka_run[i].addArguments(srr_id, str(srr_id) + "_prokka_output", output_filtering_contigs)
-    prokka_run[i].uses(output_filtering_contigs, link=Link.INPUT)
-    prokka_run[i].uses(str(srr_id) + "_prokka_output/" + str(srr_id) + ".gff", link=Link.OUTPUT, transfer=True)
-    prokka_run[i].uses(str(srr_id) + "_prokka_output.tar.gz", link=Link.OUTPUT, transfer=True)
-    # prokka_run[i].addProfile(Profile("pegasus", "label", str(srr_id)))
-    prokka_run[i].addProfile(Profile("pegasus", "runtime", "14400"))
-    prokka_run[i].addProfile(Profile("globus", "maxwalltime", "240"))
-    dax.addJob(prokka_run[i])
+    prokka_run[i].add_args(
+        srr_id, str(srr_id) + "_prokka_output", output_filtering_contigs
+    )
+    prokka_run[i].add_inputs(output_filtering_contigs)
+    prokka_run[i].add_outputs(
+        str(srr_id) + "_prokka_output/" + str(srr_id) + ".gff",
+        stage_out=True,
+    )
+    prokka_run[i].add_outputs(str(srr_id) + "_prokka_output.tar.gz", stage_out=True)
+    # prokka_run[i].add_profiles(Namespace.PEGASUS, "label", str(srr_id))
+    prokka_run[i].add_profiles(Namespace.PEGASUS, "runtime", "14400")
+    prokka_run[i].add_profiles(Namespace.GLOBUS, "maxwalltime", "240")
+    dax.add_jobs(prokka_run[i])
     # add files
     f = File(str(srr_id) + "_prokka_output/" + str(srr_id) + ".gff")
     list_of_gff_files.append(f)
 
     # add job for plasmidfinder
     plasmidfinder_run.append(Job("ex_plasmidfinder_run"))
-    plasmidfinder_run[i].addArguments(output_filtering_contigs, str(srr_id) + "_plasmidfinder_output")
-    plasmidfinder_run[i].uses(output_filtering_contigs, link=Link.INPUT)
-    plasmidfinder_run[i].uses(str(srr_id) + "_plasmidfinder_output.tar.gz", link=Link.OUTPUT, transfer=True)
-    # plasmidfinder_run[i].addProfile(Profile("pegasus", "label", str(srr_id)))
-    dax.addJob(plasmidfinder_run[i])
+    plasmidfinder_run[i].add_args(
+        output_filtering_contigs, str(srr_id) + "_plasmidfinder_output"
+    )
+    plasmidfinder_run[i].add_inputs(output_filtering_contigs)
+    plasmidfinder_run[i].add_outputs(
+        str(srr_id) + "_plasmidfinder_output.tar.gz", stage_out=True
+    )
+    # plasmidfinder_run[i].add_profiles(Namespace.PEGASUS, "label", str(srr_id))
+    dax.add_jobs(plasmidfinder_run[i])
 
     # add job for sistr
     sistr_run.append(Job("ex_sistr_run"))
-    sistr_run[i].addArguments(str(srr_id) + "_allele_results.json", str(srr_id) + "_novel_alleles.fasta", str(srr_id) + "_cgmlst_profiles.csv", str(srr_id) + "_sistr_output.csv", output_filtering_contigs)
-    sistr_run[i].uses(output_filtering_contigs, link=Link.INPUT)
-    sistr_run[i].uses(str(srr_id) + "_sistr_output.csv", link=Link.OUTPUT, transfer=False)
-    dax.addJob(sistr_run[i])
+    sistr_run[i].add_args(
+        str(srr_id) + "_allele_results.json",
+        str(srr_id) + "_novel_alleles.fasta",
+        str(srr_id) + "_cgmlst_profiles.csv",
+        str(srr_id) + "_sistr_output.csv",
+        output_filtering_contigs,
+    )
+    sistr_run[i].add_inputs(output_filtering_contigs)
+    sistr_run[i].add_outputs(str(srr_id) + "_sistr_output.csv", stage_out=False)
+    dax.add_jobs(sistr_run[i])
     list_of_sistr_files.append(str(srr_id) + "_sistr_output.csv")
 
     i = i + 1
@@ -78,154 +102,157 @@ for output_filtering_contigs in list_of_contig_files:
 
 # add job for mlst
 mlst_run = Job("ex_mlst_run")
-mlst_run.addArguments(*list_of_contig_files)
+mlst_run.add_args(*list_of_contig_files)
 for l in list_of_contig_files:
-    mlst_run.uses(l, link=Link.INPUT)
+    mlst_run.add_inputs(l)
 o = File("mlst_output.csv")
-mlst_run.setStdout(o)
-mlst_run.uses(o, link=Link.OUTPUT, transfer=True)
-mlst_run.addProfile(Profile("pegasus", "runtime", "108000"))
-mlst_run.addProfile(Profile("globus", "maxwalltime", "1800"))
-# mlst_run.addProfile(Profile("pegasus", "label", str(srr_id)))
-dax.addJob(mlst_run)
+mlst_run.set_stdout(o, stage_out=True)
+mlst_run.add_profiles(Namespace.PEGASUS, "runtime", "108000")
+mlst_run.add_profiles(Namespace.GLOBUS, "maxwalltime", "1800")
+# mlst_run.add_profiles(Namespace.PEGASUS, "label", str(srr_id))
+dax.add_jobs(mlst_run)
 
 # add job for abricate vfdb
 abricate_vfdb_run = Job("ex_abricate_run")
-abricate_vfdb_run.addArguments("vfdb", *list_of_contig_files)
+abricate_vfdb_run.add_args("vfdb", *list_of_contig_files)
 for l in list_of_contig_files:
-    abricate_vfdb_run.uses(l, link=Link.INPUT)
+    abricate_vfdb_run.add_inputs(l)
 o = File("sabricate_vfdb_output.csv")
-abricate_vfdb_run.setStdout(o)
-abricate_vfdb_run.uses(o, link=Link.OUTPUT, transfer=True)
-# abricate_vfdb_run.addProfile(Profile("pegasus", "label", str(srr_id)))
-dax.addJob(abricate_vfdb_run)
+abricate_vfdb_run.set_stdout(o, stage_out=True)
+# abricate_vfdb_run.add_profiles(Namespace.PEGASUS, "label", str(srr_id)))
+dax.add_jobs(abricate_vfdb_run)
 
 # add job for abricate argannot
 abricate_argannot_run = Job("ex_abricate_run")
-abricate_argannot_run.addArguments("argannot", *list_of_contig_files)
+abricate_argannot_run.add_args("argannot", *list_of_contig_files)
 for l in list_of_contig_files:
-    abricate_argannot_run.uses(l, link=Link.INPUT)
+    abricate_argannot_run.add_inputs(l)
 o = File("sabricate_argannot_output.csv")
-abricate_argannot_run.setStdout(o)
-abricate_argannot_run.uses(o, link=Link.OUTPUT, transfer=True)
-# abricate_argannot_run.addProfile(Profile("pegasus", "label", str(srr_id)))
-dax.addJob(abricate_argannot_run)
+abricate_argannot_run.set_stdout(o, stage_out=True)
+# abricate_argannot_run.add_profiles(Namespace.PEGASUS, "label", str(srr_id)))
+dax.add_jobs(abricate_argannot_run)
 
 # add job for abricate card
 abricate_card_run = Job("ex_abricate_run")
-abricate_card_run.addArguments("card", *list_of_contig_files)
+abricate_card_run.add_args("card", *list_of_contig_files)
 for l in list_of_contig_files:
-    abricate_card_run.uses(l, link=Link.INPUT)
+    abricate_card_run.add_inputs(l)
 o = File("sabricate_card_output.csv")
-abricate_card_run.setStdout(o)
-abricate_card_run.uses(o, link=Link.OUTPUT, transfer=True)
-# abricate_card_run.addProfile(Profile("pegasus", "label", str(srr_id)))
-dax.addJob(abricate_card_run)
+abricate_card_run.set_stdout(o, stage_out=True)
+# abricate_card_run.add_profiles(Namespace.PEGASUS, "label", str(srr_id)))
+dax.add_jobs(abricate_card_run)
 
 # add job for abricate ncbi
 abricate_ncbi_run = Job("ex_abricate_run")
-abricate_ncbi_run.addArguments("ncbi", *list_of_contig_files)
+abricate_ncbi_run.add_args("ncbi", *list_of_contig_files)
 for l in list_of_contig_files:
-    abricate_ncbi_run.uses(l, link=Link.INPUT)
+    abricate_ncbi_run.add_inputs(l)
 o = File("sabricate_ncbi_output.csv")
-abricate_ncbi_run.setStdout(o)
-abricate_ncbi_run.uses(o, link=Link.OUTPUT, transfer=True)
-# abricate_ncbi_run.addProfile(Profile("pegasus", "label", str(srr_id)))
-dax.addJob(abricate_ncbi_run)
+abricate_ncbi_run.set_stdout(o, stage_out=True)
+# abricate_ncbi_run.add_profiles(Namespace.PEGASUS, "label", str(srr_id)))
+dax.add_jobs(abricate_ncbi_run)
 
 # add job for abricate plasmidfinder
 abricate_plasmidfinder_run = Job("ex_abricate_run")
-abricate_plasmidfinder_run.addArguments("plasmidfinder", *list_of_contig_files)
+abricate_plasmidfinder_run.add_args("plasmidfinder", *list_of_contig_files)
 for l in list_of_contig_files:
-    abricate_plasmidfinder_run.uses(l, link=Link.INPUT)
+    abricate_plasmidfinder_run.add_inputs(l)
 o = File("sabricate_plasmidfinder_output.csv")
-abricate_plasmidfinder_run.setStdout(o)
-abricate_plasmidfinder_run.uses(o, link=Link.OUTPUT, transfer=True)
-# abricate_plasmidfinder_run.addProfile(Profile("pegasus", "label", str(srr_id)))
-dax.addJob(abricate_plasmidfinder_run)
+abricate_plasmidfinder_run.set_stdout(o, stage_out=True)
+# abricate_plasmidfinder_run.add_profiles(Namespace.PEGASUS, "label", str(srr_id)))
+dax.add_jobs(abricate_plasmidfinder_run)
 
 # add job for abricate resfinder
 abricate_resfinder_run = Job("ex_abricate_run")
-abricate_resfinder_run.addArguments("resfinder", *list_of_contig_files)
+abricate_resfinder_run.add_args("resfinder", *list_of_contig_files)
 for l in list_of_contig_files:
-    abricate_resfinder_run.uses(l, link=Link.INPUT)
+    abricate_resfinder_run.add_inputs(l)
 o = File("sabricate_resfinder_output.csv")
-abricate_resfinder_run.setStdout(o)
-abricate_resfinder_run.uses(o, link=Link.OUTPUT, transfer=True)
-# abricate_resfinder_run.addProfile(Profile("pegasus", "label", str(srr_id)))
-dax.addJob(abricate_resfinder_run)
+abricate_resfinder_run.set_stdout(o, stage_out=True)
+# abricate_resfinder_run.add_profiles(Namespace.PEGASUS, "label", str(srr_id)))
+dax.add_jobs(abricate_resfinder_run)
 
 # add job for Roary
 roary_run = Job("ex_roary_run")
-roary_run.addArguments("roary_output", *list_of_gff_files)
+roary_run.add_args("roary_output", *list_of_gff_files)
 for l in list_of_gff_files:
-    roary_run.uses(l, link=Link.INPUT)
-roary_run.uses("roary_output/core_gene_alignment.aln", link=Link.OUTPUT, transfer=True)
-roary_run.uses("roary_output.tar.gz", link=Link.OUTPUT, transfer=True)
-roary_run.addProfile(Profile("pegasus", "runtime", "604800"))
-roary_run.addProfile(Profile("globus", "maxwalltime", "10080"))
-roary_run.addProfile(Profile("condor", "request_memory", "970000"))
-roary_run.addProfile(Profile("condor", "memory", "970000"))
-# roary_run.addProfile(Profile("pegasus", "label", str(srr_id)))
-dax.addJob(roary_run)
+    roary_run.add_inputs(l)
+roary_run.add_outputs("roary_output/core_gene_alignment.aln", stage_out=True)
+roary_run.add_outputs("roary_output.tar.gz", stage_out=True)
+roary_run.add_profiles(Namespace.PEGASUS, "runtime", "604800")
+roary_run.add_profiles(Namespace.GLOBUS, "maxwalltime", "10080")
+roary_run.add_profiles(Namespace.CONDOR, "request_memory", "970000")
+roary_run.add_profiles(Namespace.CONDOR, "memory", "970000")
+# roary_run.add_profiles(Namespace.PEGASUS, "label", str(srr_id)))
+dax.add_jobs(roary_run)
 
 # add job for baps_run
 # R script, wrapper
 fastbaps_run = Job("ex_fastbaps_run")
 fastbaps_output = File("fastbaps_baps.csv")
-fastbaps_run.addArguments("roary_output/core_gene_alignment.aln", fastbaps_output)
-fastbaps_run.uses("roary_output/core_gene_alignment.aln", link=Link.INPUT)
-fastbaps_run.uses(fastbaps_output, link=Link.OUTPUT, transfer=True)
-fastbaps_run.addProfile(Profile("condor", "request_memory", "30000"))
-fastbaps_run.addProfile(Profile("globus", "maxmemory", "30000"))
-fastbaps_run.addProfile(Profile("pegasus", "memory", "30000"))
-# fastbaps_run.addProfile(Profile("pegasus", "label", str(srr_id)))
-dax.addJob(fastbaps_run)
+fastbaps_run.add_args("roary_output/core_gene_alignment.aln", fastbaps_output)
+fastbaps_run.add_inputs("roary_output/core_gene_alignment.aln")
+fastbaps_run.add_outputs(fastbaps_output, stage_out=True)
+fastbaps_run.add_profiles(Namespace.CONDOR, "request_memory", "30000")
+fastbaps_run.add_profiles(Namespace.GLOBUS, "maxmemory", "30000")
+fastbaps_run.add_profiles(Namespace.PEGASUS, "memory", "30000")
+# fastbaps_run.add_profiles(Namespace.PEGASUS, "label", str(srr_id)))
+dax.add_jobs(fastbaps_run)
 
 # ls
 ls_run = Job("ex_ls")
-ls_run.addArguments(run_dir)
-dax.addJob(ls_run)
+ls_run.add_args(run_dir)
+dax.add_jobs(ls_run)
 
 # add job for cat sistr files
-ex_cat = Executable(namespace="dax", name="cat", version="4.0", os="linux", arch="x86_64", installed=True)
-ex_cat.addPFN(PFN("/bin/cat", "local-hcc"))
-dax.addExecutable(ex_cat)
+ex_cat = Transformation(
+    namespace="dax",
+    name="cat",
+    version="4.0",
+    site="local-hcc",
+    pfn="/bin/cat",
+    os_type=OS.LINUX,
+    arch=Arch.X86_64,
+    is_stageable=False,
+)
+tc.add_transformations(ex_cat)
 output_sistr_cat = File("sistr_all.csv")
-cat = Job(namespace="dax", name=ex_cat)
-cat.addArguments(*list_of_sistr_files)
+cat = Job(ex_cat, namespace="dax")
+cat.add_args(*list_of_sistr_files)
 for l in list_of_sistr_files:
-    cat.uses(l, link=Link.INPUT)
-cat.setStdout(output_sistr_cat)
-cat.uses(output_sistr_cat, link=Link.OUTPUT, transfer=True, register=False)
-dax.addJob(cat)
+    cat.add_inputs(l)
+cat.set_stdout(output_sistr_cat, stage_out=True, register_replica=False)
+dax.add_jobs(cat)
 
 # add job for sistr output filtering
 output_sistr_merge_cat = File("sistr_all_merge.csv")
 merge_sistr_run = Job("ex_merge_sistr")
-merge_sistr_run.addArguments(output_sistr_cat, output_sistr_merge_cat)
-merge_sistr_run.uses(output_sistr_cat, link=Link.INPUT)
-merge_sistr_run.uses(output_sistr_merge_cat, link=Link.OUTPUT, transfer=True)
-dax.addJob(merge_sistr_run)
+merge_sistr_run.add_args(output_sistr_cat, output_sistr_merge_cat)
+merge_sistr_run.add_inputs(output_sistr_cat)
+merge_sistr_run.add_outputs(output_sistr_merge_cat, stage_out=True)
+dax.add_jobs(merge_sistr_run)
 
 
 length = len(list_of_contig_files)
-for i in range(0,length):
+for i in range(0, length):
     # Add control-flow dependencies
-    dax.addDependency(Dependency(parent=plasmidfinder_run[i], child=ls_run))
-    dax.addDependency(Dependency(parent=prokka_run[i], child=roary_run))
+    dax.add_dependency(plasmidfinder_run[i], children=[ls_run])
+    dax.add_dependency(prokka_run[i], children=[roary_run])
     # COMMENT OUT THE LINE BELOW TO SKIP SISTR IF NON SALMONELLA ORGANISM IS USED!!!
-    dax.addDependency(Dependency(parent=sistr_run[i], child=cat))
-dax.addDependency(Dependency(parent=mlst_run, child=ls_run))
-dax.addDependency(Dependency(parent=abricate_argannot_run, child=ls_run))
-dax.addDependency(Dependency(parent=abricate_card_run, child=ls_run))
-dax.addDependency(Dependency(parent=abricate_ncbi_run, child=ls_run))
-dax.addDependency(Dependency(parent=abricate_plasmidfinder_run, child=ls_run))
-dax.addDependency(Dependency(parent=abricate_resfinder_run, child=ls_run))
-dax.addDependency(Dependency(parent=abricate_vfdb_run, child=ls_run))
-dax.addDependency(Dependency(parent=roary_run, child=fastbaps_run))
-dax.addDependency(Dependency(parent=cat, child=merge_sistr_run))
+    dax.add_dependency(sistr_run[i], children=[cat])
+dax.add_dependency(mlst_run, children=[ls_run])
+dax.add_dependency(abricate_argannot_run, children=[ls_run])
+dax.add_dependency(abricate_card_run, children=[ls_run])
+dax.add_dependency(abricate_ncbi_run, children=[ls_run])
+dax.add_dependency(abricate_plasmidfinder_run, children=[ls_run])
+dax.add_dependency(abricate_resfinder_run, children=[ls_run])
+dax.add_dependency(abricate_vfdb_run, children=[ls_run])
+dax.add_dependency(roary_run, children=[fastbaps_run])
+dax.add_dependency(cat, children=[merge_sistr_run])
 
 
 # Write the DAX to stdout
-dax.writeXML(sys.stdout)
+dax.add_transformation_catalog(tc)
+dax.add_site_catalog(sc)
+dax.add_replica_catalog(rc)
+dax.write(sys.stdout)

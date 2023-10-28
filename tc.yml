@@ -1,0 +1,194 @@
+# file-based transformation catalog in yaml : 2023-10-27T16:40:54.864-07:00
+---
+pegasus: "5.0"
+transformations:
+ -
+  name: "ex_abricate_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/abricate.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_cat"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/bin/cat"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_conda_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/create_conda_env.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_fastbaps_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/fastbaps.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_fastqc_fail_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/fastqc_fail.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_fastqc_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/fastqc.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_filtering_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/filtering.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_generate"
+  sites:
+   -
+    name: "local"
+    type: "installed"
+    pfn: "/ProkEvo_dir/sub-dax.py"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_ls"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/ls.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_merge_sistr"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/merge_sistr.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_mlst_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/mlst.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_plasmidfinder_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/plasmidfinder.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_prokka_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/prokka.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_quast_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/quast.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_roary_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/roary.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_sistr_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/sistr.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_spades_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/spades.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_sra_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/download_sra.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"
+ -
+  name: "ex_trim_run"
+  sites:
+   -
+    name: "local-hcc"
+    type: "installed"
+    pfn: "/ProkEvo_dir/scripts/trim.sh"
+    bypass: false
+    arch: "x86_64"
+    os.type: "linux"

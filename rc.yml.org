@@ -1,0 +1,16 @@
+# file-based replica catalog in yaml : 2023-10-27T17:01:49.506-07:00
+---
+pegasus: "5.0"
+replicas:
+ -
+  lfn: "sra_ids.txt"
+  pfns:
+   -
+    pfn: "file:///ProkEvo_dir/sra_ids.txt"
+    site: "local"
+ -
+  lfn: "prokevo.yml"
+  pfns:
+   -
+    pfn: "file:///ProkEvo_dir/prokevo.yml"
+    site: "local"

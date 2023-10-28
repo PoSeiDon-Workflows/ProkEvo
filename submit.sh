@@ -8,7 +8,7 @@ TOPDIR=`pwd`
 
 <<DO_NOT_COMMENT_OUT
 You can use raw Illumina sequences stored locally instead of downloading them from NCBI.
-To do this, you will need to add information about the input files in rc.txt.
+To do this, you will need to add information about the input files in rc.yml.
 You can add these files in a loop as shown below, or any way you prefer.
 You should also comment out the dependency in root-dax.py to skip the download.
 DO_NOT_COMMENT_OUT
@@ -16,25 +16,25 @@ DO_NOT_COMMENT_OUT
 <<COMM
 while read line
 do
-echo ''${line}'_1.fastq file:///absolute_path_to_fastq_files/'${line}'_1.fastq site="local"' >> rc.txt
-echo ''${line}'_2.fastq file:///absolute_path_to_fastq_files/'${line}'_2.fastq site="local"' >> rc.txt
-done < sra_ids.txt 
+echo ''${line}'_1.fastq file:///absolute_path_to_fastq_files/'${line}'_1.fastq site="local"' >> rc.yml
+echo ''${line}'_2.fastq file:///absolute_path_to_fastq_files/'${line}'_2.fastq site="local"' >> rc.yml
+done < sra_ids.txt
 COMM
 
 # Clean old directories and files
 rm -rf data_tmp
-rm -rf scratch 
+rm -rf scratch
 rm -rf outputs
 rm -rf prokevo
 rm -rf $USER
-rm -rf root-pipeline.dax 
-rm -rf sites.xml 
-rm -rf rc.txt
-cp rc.txt.org rc.txt
+rm -rf root-pipeline.dax
+rm -rf sites.xml
+rm -rf rc.yml
+cp rc.yml.org rc.yml
 
 # Set working path to current directory
-sed -i "s|ProkEvo_dir|$PWD|g" tc.txt 
-sed -i "s|ProkEvo_dir|$PWD|g" rc.txt
+sed -i "s|ProkEvo_dir|$PWD|g" tc.yml
+sed -i "s|ProkEvo_dir|$PWD|g" rc.yml
 for i in scripts/*.sh
 do
 sed -i "s|ProkEvo_dir|$PWD|g" $i
@@ -46,29 +46,42 @@ mkdir -p $RUN_DIR
 
 # create the site catalog
 # this section contains the information about the running site
-cat > sites.xml <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<sitecatalog xmlns="http://pegasus.isi.edu/schema/sitecatalog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pegasus.isi.edu/schema/sitecatalog http://pegasus.isi.edu/schema/sc-4.0.xsd" version="4.0">
-
-    <site  handle="local-hcc" arch="x86_64" os="LINUX">
-        <directory type="shared-scratch" path="${PWD}/scratch">
-            <file-server operation="all" url="file://${PWD}/scratch"/>
-        </directory>
-        <directory type="local-storage" path="${PWD}/outputs">
-            <file-server operation="all" url="file://${PWD}/outputs"/>
-        </directory>
-
-        <profile namespace="pegasus" key="style">glite</profile>
-        <!-- tell pegasus that local-hcc is accessible on submit host -->
-        <profile namespace="pegasus" key="auxillary.local">true</profile>
-
-        <profile namespace="condor" key="grid_resource">batch slurm</profile>
-        <profile namespace="pegasus" key="queue">batch</profile>
-        <profile namespace="env" key="PEGASUS_HOME">/util/opt/pegasus-wms/5.0/</profile>
-        <profile namespace="condor" key="request_memory"> ifthenelse(isundefined(DAGNodeRetry) || DAGNodeRetry == 0, 2000, 120000) </profile>
-    </site>
-
-</sitecatalog>
+cat > sites.yml <<EOF
+---
+pegasus: "5.0"
+sites:
+ -
+  name: "local-hcc"
+  arch: "x86_64"
+  os.type: "linux"
+  directories:
+   -
+    type: "localStorage"
+    path: "${PWD}/outputs"
+    sharedFileSystem: false
+    fileServers:
+     -
+      operation: "all"
+      url: "file://${PWD}/outputs"
+   -
+    type: "sharedScratch"
+    path: "${PWD}/scratch"
+    sharedFileSystem: false
+    fileServers:
+     -
+      operation: "all"
+      url: "file://${PWD}/scratch"
+  profiles:
+    env:
+      PEGASUS_HOME: "/util/opt/pegasus-wms/5.0/"
+    condor:
+      grid_resource: "batch slurm"
+      request_memory: "ifthenelse(isundefined(DAGNodeRetry) || DAGNodeRetry == 0,\
+        \ 2000, 120000)"
+    pegasus:
+      auxillary.local: "true"
+      queue: "batch"
+      style: "glite"
 EOF
 
 
