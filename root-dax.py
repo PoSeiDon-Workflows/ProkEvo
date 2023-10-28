@@ -71,8 +71,8 @@ dax.add_jobs(generate)
 
 # Add a subdax job of type DAX that takes the runtime generated sub dax file in the previous step and runs the computation.
 sub_dax = SubWorkflow(c)
-sub_dax.add_args(
-    "--sites local-hcc", "--output-site local-hcc", "--basename sub-pipeline"
+sub_dax.add_planner_args(
+    basename="sub-pipeline", sites=["local-hcc"], output_sites=["local-hcc"]
 )
 dax.add_jobs(sub_dax)
 

@@ -16,8 +16,21 @@ DO_NOT_COMMENT_OUT
 <<COMM
 while read line
 do
-echo ''${line}'_1.fastq file:///absolute_path_to_fastq_files/'${line}'_1.fastq site="local"' >> rc.yml
-echo ''${line}'_2.fastq file:///absolute_path_to_fastq_files/'${line}'_2.fastq site="local"' >> rc.yml
+cat >> rc.yml <<EOT
+ -
+  lfn: "${line}_1.fastq"
+  pfns:
+   -
+    pfn: "file:///absolute_path_to_fastq_files/${line}_1.fastq"
+    site: "local"
+ -
+  lfn: "${line}_2.fastq"
+  pfns:
+   -
+    pfn: "file:///ProkEvo_dir/${line}_2.fastq"
+    site: "local"
+EOT
+
 done < sra_ids.txt
 COMM
 
@@ -28,7 +41,7 @@ rm -rf outputs
 rm -rf prokevo
 rm -rf $USER
 rm -rf root-pipeline.dax
-rm -rf sites.xml
+rm -rf sites.yml
 rm -rf rc.yml
 cp rc.yml.org rc.yml
 
