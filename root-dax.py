@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 NOTE:
@@ -89,8 +89,8 @@ for i in range(0, length):
 
     forward_file.append(File(str(srr_id) + "_1.fastq"))
     reverse_file.append(File(str(srr_id) + "_2.fastq"))
-    # Rajiv dax.add_inputs(forward_file[i])
-    # Rajiv dax.add_inputs(reverse_file[i])
+    sub_dax.add_inputs(File(forward_file[i].lfn, for_planning=False))
+    sub_dax.add_inputs(File(reverse_file[i].lfn, for_planning=False))
 
     # add job for downloading data from NCBI
     sra_run.append(Job("ex_sra_run"))
