@@ -5,7 +5,8 @@
 # export -f module
 # module use /util/opt/hcc-modules/Common/
 # module load anaconda
-conda activate ProkEvo_dir/prokevo
+source /opt/conda/etc/profile.d/conda.sh
+conda activate /opt/ProkEvo_dir/prokevo
 
 # roary "$@"
 roary -s -e --mafft -p 4 -cd 99.0 -i 95 -f "$@"

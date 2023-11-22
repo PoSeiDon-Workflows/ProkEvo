@@ -5,7 +5,8 @@
 # export -f module
 # module use /util/opt/hcc-modules/Common/
 # module load anaconda
-conda activate ProkEvo_dir/prokevo
+source /opt/conda/etc/profile.d/conda.sh
+conda activate /opt/ProkEvo_dir/prokevo
 
 set -o pipefail
 
@@ -40,35 +41,35 @@ spades.py -t 1 -1 $1 -2 $2 \
 
 
 # Spades gives different error codes that needs to be handled respectively
-ec=$? 
+ec=$?
 output=$3
 
 if [ "$ec" = 1 ]
 then
 if (grep "err code: -6" spades-output.txt) >/dev/null 2>&1
 then
-echo "WARNING: spades exited with -6. Changing exit code to 0." 
+echo "WARNING: spades exited with -6. Changing exit code to 0."
 ec=0
 # create 0-byte file
 touch $output/contigs.fasta
 check_files
 elif (grep "err code: -11" spades-output.txt) >/dev/null 2>&1
 then
-echo "WARNING: spades exited with -11. Changing exit code to 0." 
+echo "WARNING: spades exited with -11. Changing exit code to 0."
 ec=0
 # create 0-byte file
 touch $output/contigs.fasta
 check_files
 elif (grep "err code: -9" spades-output.txt) >/dev/null 2>&1
 then
-echo "WARNING: spades exited with -9. Changing exit code to 0." 
+echo "WARNING: spades exited with -9. Changing exit code to 0."
 ec=0
 # create 0-byte file
 touch $output/contigs.fasta
 check_files
 elif (grep "err code: 255" spades-output.txt) >/dev/null 2>&1
 then
-echo "WARNING: spades exited with -255. Changing exit code to 0." 
+echo "WARNING: spades exited with -255. Changing exit code to 0."
 ec=0
 # create 0-byte file
 touch $output/contigs.fasta

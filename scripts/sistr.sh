@@ -5,7 +5,8 @@
 # export -f module
 # module use /util/opt/hcc-modules/Common/
 # module load anaconda
-conda activate ProkEvo_dir/prokevo
+source /opt/conda/etc/profile.d/conda.sh
+conda activate /opt/ProkEvo_dir/prokevo
 
 # sistr "$@"
 sistr --qc -vv --alleles-output $1 --novel-alleles $2 --cgmlst-profiles $3 \

@@ -9,5 +9,5 @@ if [ $a == 0 ] || [ $a -ge 300 ] || [ $b -le 25000 ]
 then
 echo "ignore"
 else
-cp $2 $3/$4_contigs.fasta
+cp $2 $4_contigs.fasta
 fi
