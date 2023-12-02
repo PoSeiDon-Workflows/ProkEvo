@@ -1,0 +1,9 @@
+x-pegasus:
+  apiLang: python
+pegasus: 5.0.4
+replicas:
+- lfn: .*
+  pfns:
+  - site: local
+    pfn: /Volumes/data/workspace/pegasus/ProkEvo/data/[0]
+  regex: true
