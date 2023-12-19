@@ -1,8 +1,3 @@
-pegasus.catalog.replica.file=rc.yml
-pegasus.catalog.site.file = sites.yml
-pegasus.catalog.transformation.file=tc.yml
-
-pegasus.dir.useTimestamp = true
 pegasus.dir.storage.deep = false
 pegasus.condor.logs.symlink = false
 # pegasus.dir.storage.mapper = Flat
@@ -19,3 +14,19 @@ dagman.retry = 3
 
 # set limit for SRA download at the time
 dagman.sradownload.maxjobs = 50
+
+# Poseidon
+
+# Only for macOS
+#pegasus.mode = development
+#dagman.retry = 0
+#env.JAVA_HOME = /opt/homebrew/opt/openjdk
+
+pegasus.catalog.site.file = sites.yml
+pegasus.catalog.replica.file = replicas.yml
+pegasus.catalog.transformation.file = transformations.yml
+
+pegasus.dir.useTimestamp = false
+
+pegasus.data.configuration = nonsharedfs
+pegasus.transfer.bypass.input.staging = true

@@ -28,7 +28,6 @@ from Pegasus.api import (
 dax = Workflow("pipeline")
 tc = TransformationCatalog()
 rc = ReplicaCatalog()
-sc = SiteCatalog()
 base_dir = os.getcwd()
 
 sra_file = Path(sys.argv[1]).resolve()
@@ -64,7 +63,7 @@ input_file = open(sra_file)
 lines = input_file.readlines()
 length = len(lines)
 
-rc.add_regex_replica("local", ".*", (Path("data") / "[0]").resolve())
+rc.add_regex_replica("local", ".*", "http://poseidon-data/~poseidon/ProkEvo/data/[0]")
 
 for i in range(0, length):
     srr_id = lines[i].strip()
@@ -209,20 +208,8 @@ for i in range(0, length):
 
 
 # add job for cat FastQC Fail
-ex_cat = Transformation(
-    namespace="dax",
-    name="cat",
-    version="4.0",
-    site="condorpool",
-    pfn="/bin/cat",
-    os_type=OS.LINUX,
-    arch=Arch.AARCH64,
-    is_stageable=False,
-    container=container,
-)
-tc.add_transformations(ex_cat)
 output_fastqc_cat = File("fastqc_summary_all.txt")
-cat = Job(ex_cat, namespace="dax")
+cat = Job("ex_cat")
 cat.add_args(*list_of_fastqc_files)
 for l in list_of_fastqc_files:
     cat.add_inputs(l)
@@ -330,7 +317,7 @@ fastbaps_run.add_profiles(Namespace.PEGASUS, "memory", "2048")
 # dax.add_jobs(fastbaps_run)
 
 output_sistr_cat = File("sistr_all.csv")
-cat = Job(ex_cat, namespace="dax")
+cat = Job("ex_cat")
 cat.add_args(*list_of_sistr_files)
 for l in list_of_sistr_files:
     cat.add_inputs(l)
@@ -347,8 +334,7 @@ dax.add_jobs(merge_sistr_run)
 
 
 # Write the DAX to stdout
-dax.add_transformation_catalog(tc)
-# dax.add_site_catalog(sc)
+# dax.add_transformation_catalog(tc)
 # dax.add_replica_catalog(rc)
 rc.write("replicas.yml")
 dax.write(sys.stdout)

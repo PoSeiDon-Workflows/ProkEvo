@@ -1,0 +1,52 @@
+x-pegasus:
+  apiLang: python
+  createdBy: poseidon
+  createdOn: 02-17-23T01:38:54Z
+pegasus: 5.0.4
+sites:
+- name: local
+  directories:
+  - type: sharedScratch
+    path: ${PWD}/scratch-local
+    sharedFileSystem: false
+    fileServers:
+    - url: file://${PWD}/scratch-local
+      operation: all
+  - type: localStorage
+    path: ${PWD}/output
+    sharedFileSystem: false
+    fileServers:
+    - url: file://${PWD}/output
+      operation: all
+  profiles:
+    env:
+      PEGASUS_TRANSFER_PUBLISH: '1'
+      PEGASUS_AMQP_URL: amqp://panorama:panorama@poseidon-submit:5672/panorama/monitoring
+- name: condorpool
+  directories:
+  - type: sharedScratch
+    path: /home/poseidon/public_html/scratch
+    sharedFileSystem: false
+    fileServers:
+    - url: http://poseidon-data/~poseidon/scratch
+      operation: get
+    - url: scp://poseidon@poseidon-data/home/poseidon/public_html/scratch
+      operation: put
+  - type: sharedStorage
+    path: /home/poseidon/public_html/storage
+    sharedFileSystem: false
+    fileServers:
+    - url: scp://poseidon@poseidon-data/home/poseidon/public_html/storage
+      operation: all
+  profiles:
+    condor:
+      universe: vanilla
+    env:
+      KICKSTART_MON_URL: rabbitmq://panorama:panorama@poseidon-submit:15672/api/exchanges/panorama/monitoring/publish
+      PEGASUS_TRANSFER_PUBLISH: '1'
+      PEGASUS_AMQP_URL: amqp://panorama:panorama@poseidon-submit:5672/panorama/monitoring
+    pegasus:
+      style: condor
+      data.configuration: nonsharedfs
+      SSH_PRIVATE_KEY: ${HOME}/.ssh/storage_rsa
+      #gridstart.arguments: -m 5

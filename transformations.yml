@@ -1,0 +1,130 @@
+x-pegasus:
+  apiLang: python
+pegasus: 5.0.4
+transformations:
+- name: worker
+  namespace: pegasus
+  sites:
+  - name: local
+    type: stageable
+    pfn: https://download.pegasus.isi.edu/pegasus/5.1.0dev/pegasus-worker-5.1.0dev-x86_64_rhel_8.tar.gz
+- name: ex_abricate_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/abricate.sh
+    container: prokevo
+- name: ex_cat
+  sites:
+  - name: condorpool
+    type: installed
+    pfn: /bin/cat
+- name: ex_conda_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/create_conda_env.sh
+    container: prokevo
+- name: ex_fastbaps_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/fastbaps.sh
+    container: prokevo
+- name: ex_fastqc_fail_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/fastqc_fail.sh
+    container: prokevo
+- name: ex_fastqc_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/fastqc.sh
+    container: prokevo
+- name: ex_filtering_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/filtering.sh
+    container: prokevo
+- name: ex_generate
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/sub-dax.py
+- name: ex_ls
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/ls.sh
+    container: prokevo
+- name: ex_merge_sistr
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/merge_sistr.sh
+    container: prokevo
+- name: ex_mlst_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/mlst.sh
+    container: prokevo
+- name: ex_plasmidfinder_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/plasmidfinder.sh
+    container: prokevo
+- name: ex_prokka_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/prokka.sh
+    container: prokevo
+- name: ex_quast_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/quast.sh
+    container: prokevo
+- name: ex_roary_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/roary.sh
+    container: prokevo
+- name: ex_sistr_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/sistr.sh
+    container: prokevo
+- name: ex_spades_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/spades.sh
+    container: prokevo
+- name: ex_sra_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/download_sra.sh
+    container: prokevo
+- name: ex_trim_run
+  sites:
+  - name: local
+    type: stageable
+    pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/trim.sh
+    container: prokevo
+containers:
+- name: prokevo
+  type: docker
+  image: http://poseidon-data/~poseidon/ProkEvo/data/prokevo.tar
+  image.site: local
+  profiles:
+    pegasus:
+      container.arguments: "--network fabric-testbed_default"
