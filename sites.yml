@@ -49,4 +49,4 @@ sites:
       style: condor
       data.configuration: nonsharedfs
       SSH_PRIVATE_KEY: ${HOME}/.ssh/storage_rsa
-      #gridstart.arguments: -m 5
+      gridstart.arguments: -m 5
