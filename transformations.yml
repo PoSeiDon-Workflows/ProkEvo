@@ -123,7 +123,7 @@ transformations:
 containers:
 - name: prokevo
   type: singularity
-  image: http://poseidon-data/~poseidon/ProkEvo/data/prokevo.sif
+  image: http://poseidon-data/~poseidon/containers/prokevo.sif
   image.site: local
   profiles:
     pegasus:
