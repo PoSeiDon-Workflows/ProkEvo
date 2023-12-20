@@ -1,0 +1,573 @@
+x-pegasus:
+  apiLang: python
+  createdBy: mayani
+  createdOn: 12-20-23T11:43:31Z
+pegasus: 5.0.4
+name: pipeline
+jobs:
+- type: job
+  name: ex_trim_run
+  id: ID0000001
+  arguments:
+  - SRR5160663_1.fastq
+  - SRR5160663_2.fastq
+  - SRR5160663_pair_1_trimmed.fastq
+  - SRR5160663_unpair_1_trimmed.fastq
+  - SRR5160663_pair_2_trimmed.fastq
+  - SRR5160663_unpair_2_trimmed.fastq
+  uses:
+  - lfn: SRR5160663_unpair_2_trimmed.fastq
+    type: output
+    stageOut: false
+    registerReplica: true
+  - lfn: SRR5160663_pair_2_trimmed.fastq
+    type: output
+    stageOut: false
+    registerReplica: true
+  - lfn: SRR5160663_2.fastq
+    type: input
+  - lfn: SRR5160663_pair_1_trimmed.fastq
+    type: output
+    stageOut: false
+    registerReplica: true
+  - lfn: SRR5160663_1.fastq
+    type: input
+  - lfn: SRR5160663_unpair_1_trimmed.fastq
+    type: output
+    stageOut: false
+    registerReplica: true
+- type: job
+  name: ex_fastqc_run
+  id: ID0000002
+  arguments:
+  - SRR5160663_pair_1_trimmed.fastq
+  - SRR5160663_pair_2_trimmed.fastq
+  uses:
+  - lfn: SRR5160663_pair_2_trimmed_fastq_summary.txt
+    type: output
+    stageOut: false
+    registerReplica: true
+  - lfn: SRR5160663_pair_1_trimmed.fastq
+    type: input
+  - lfn: SRR5160663_pair_1_trimmed_fastq_summary.txt
+    type: output
+    stageOut: false
+    registerReplica: true
+  - lfn: SRR5160663_pair_2_trimmed.fastq
+    type: input
+- type: job
+  name: ex_spades_run
+  id: ID0000003
+  arguments:
+  - SRR5160663_pair_1_trimmed.fastq
+  - SRR5160663_pair_2_trimmed.fastq
+  - SRR5160663_spades_output
+  uses:
+  - lfn: SRR5160663_pair_1_trimmed.fastq
+    type: input
+  - lfn: SRR5160663_spades_output/contigs.fasta
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: SRR5160663_pair_2_trimmed.fastq
+    type: input
+- type: job
+  name: ex_quast_run
+  id: ID0000004
+  arguments:
+  - SRR5160663_quast_output
+  - SRR5160663_spades_output/contigs.fasta
+  uses:
+  - lfn: SRR5160663_quast_output/transposed_report.tsv
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: SRR5160663_spades_output/contigs.fasta
+    type: input
+- type: job
+  name: ex_filtering_run
+  id: ID0000005
+  arguments:
+  - SRR5160663_quast_output/transposed_report.tsv
+  - SRR5160663_spades_output/contigs.fasta
+  - ProkEvo
+  - SRR5160663
+  uses:
+  - lfn: SRR5160663_quast_output/transposed_report.tsv
+    type: input
+  - lfn: SRR5160663_contigs.fasta
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: SRR5160663_spades_output/contigs.fasta
+    type: input
+- type: job
+  name: ex_prokka_run
+  id: ID0000006
+  arguments:
+  - SRR5160663
+  - SRR5160663_prokka_output
+  - SRR5160663_contigs.fasta
+  uses:
+  - lfn: SRR5160663_prokka_output/SRR5160663.gff
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: SRR5160663_contigs.fasta
+    type: input
+  - lfn: SRR5160663_prokka_output.tar.gz
+    type: output
+    stageOut: true
+    registerReplica: true
+- type: job
+  name: ex_plasmidfinder_run
+  id: ID0000007
+  arguments:
+  - SRR5160663_contigs.fasta
+  - SRR5160663_plasmidfinder_output
+  uses:
+  - lfn: 9cdf35065947.tar.gz
+    type: input
+  - lfn: SRR5160663_contigs.fasta
+    type: input
+  - lfn: SRR5160663_plasmidfinder_output.tar.gz
+    type: output
+    stageOut: true
+    registerReplica: true
+- type: job
+  name: ex_sistr_run
+  id: ID0000008
+  arguments:
+  - SRR5160663_allele_results.json
+  - SRR5160663_novel_alleles.fasta
+  - SRR5160663_cgmlst_profiles.csv
+  - SRR5160663_sistr_output.csv
+  - SRR5160663_contigs.fasta
+  uses:
+  - lfn: SRR5160663_contigs.fasta
+    type: input
+  - lfn: SRR5160663_sistr_output.csv
+    type: output
+    stageOut: false
+    registerReplica: true
+- type: job
+  name: ex_trim_run
+  id: ID0000009
+  arguments:
+  - SRR8385633_1.fastq
+  - SRR8385633_2.fastq
+  - SRR8385633_pair_1_trimmed.fastq
+  - SRR8385633_unpair_1_trimmed.fastq
+  - SRR8385633_pair_2_trimmed.fastq
+  - SRR8385633_unpair_2_trimmed.fastq
+  uses:
+  - lfn: SRR8385633_2.fastq
+    type: input
+  - lfn: SRR8385633_pair_2_trimmed.fastq
+    type: output
+    stageOut: false
+    registerReplica: true
+  - lfn: SRR8385633_1.fastq
+    type: input
+  - lfn: SRR8385633_pair_1_trimmed.fastq
+    type: output
+    stageOut: false
+    registerReplica: true
+  - lfn: SRR8385633_unpair_1_trimmed.fastq
+    type: output
+    stageOut: false
+    registerReplica: true
+  - lfn: SRR8385633_unpair_2_trimmed.fastq
+    type: output
+    stageOut: false
+    registerReplica: true
+- type: job
+  name: ex_fastqc_run
+  id: ID0000010
+  arguments:
+  - SRR8385633_pair_1_trimmed.fastq
+  - SRR8385633_pair_2_trimmed.fastq
+  uses:
+  - lfn: SRR8385633_pair_1_trimmed.fastq
+    type: input
+  - lfn: SRR8385633_pair_2_trimmed_fastq_summary.txt
+    type: output
+    stageOut: false
+    registerReplica: true
+  - lfn: SRR8385633_pair_1_trimmed_fastq_summary.txt
+    type: output
+    stageOut: false
+    registerReplica: true
+  - lfn: SRR8385633_pair_2_trimmed.fastq
+    type: input
+- type: job
+  name: ex_spades_run
+  id: ID0000011
+  arguments:
+  - SRR8385633_pair_1_trimmed.fastq
+  - SRR8385633_pair_2_trimmed.fastq
+  - SRR8385633_spades_output
+  uses:
+  - lfn: SRR8385633_pair_1_trimmed.fastq
+    type: input
+  - lfn: SRR8385633_spades_output/contigs.fasta
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: SRR8385633_pair_2_trimmed.fastq
+    type: input
+- type: job
+  name: ex_quast_run
+  id: ID0000012
+  arguments:
+  - SRR8385633_quast_output
+  - SRR8385633_spades_output/contigs.fasta
+  uses:
+  - lfn: SRR8385633_spades_output/contigs.fasta
+    type: input
+  - lfn: SRR8385633_quast_output/transposed_report.tsv
+    type: output
+    stageOut: true
+    registerReplica: true
+- type: job
+  name: ex_filtering_run
+  id: ID0000013
+  arguments:
+  - SRR8385633_quast_output/transposed_report.tsv
+  - SRR8385633_spades_output/contigs.fasta
+  - ProkEvo
+  - SRR8385633
+  uses:
+  - lfn: SRR8385633_contigs.fasta
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: SRR8385633_spades_output/contigs.fasta
+    type: input
+  - lfn: SRR8385633_quast_output/transposed_report.tsv
+    type: input
+- type: job
+  name: ex_prokka_run
+  id: ID0000014
+  arguments:
+  - SRR8385633
+  - SRR8385633_prokka_output
+  - SRR8385633_contigs.fasta
+  uses:
+  - lfn: SRR8385633_contigs.fasta
+    type: input
+  - lfn: SRR8385633_prokka_output.tar.gz
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: SRR8385633_prokka_output/SRR8385633.gff
+    type: output
+    stageOut: true
+    registerReplica: true
+- type: job
+  name: ex_plasmidfinder_run
+  id: ID0000015
+  arguments:
+  - SRR8385633_contigs.fasta
+  - SRR8385633_plasmidfinder_output
+  uses:
+  - lfn: 9cdf35065947.tar.gz
+    type: input
+  - lfn: SRR8385633_contigs.fasta
+    type: input
+  - lfn: SRR8385633_plasmidfinder_output.tar.gz
+    type: output
+    stageOut: true
+    registerReplica: true
+- type: job
+  name: ex_sistr_run
+  id: ID0000016
+  arguments:
+  - SRR8385633_allele_results.json
+  - SRR8385633_novel_alleles.fasta
+  - SRR8385633_cgmlst_profiles.csv
+  - SRR8385633_sistr_output.csv
+  - SRR8385633_contigs.fasta
+  uses:
+  - lfn: SRR8385633_contigs.fasta
+    type: input
+  - lfn: SRR8385633_sistr_output.csv
+    type: output
+    stageOut: false
+    registerReplica: true
+- type: job
+  name: ex_cat
+  id: ID0000017
+  stdout: fastqc_summary_all.txt
+  arguments:
+  - SRR5160663_pair_1_trimmed_fastq_summary.txt
+  - SRR5160663_pair_2_trimmed_fastq_summary.txt
+  - SRR8385633_pair_1_trimmed_fastq_summary.txt
+  - SRR8385633_pair_2_trimmed_fastq_summary.txt
+  uses:
+  - lfn: SRR8385633_pair_2_trimmed_fastq_summary.txt
+    type: input
+  - lfn: SRR8385633_pair_1_trimmed_fastq_summary.txt
+    type: input
+  - lfn: SRR5160663_pair_1_trimmed_fastq_summary.txt
+    type: input
+  - lfn: SRR5160663_pair_2_trimmed_fastq_summary.txt
+    type: input
+  - lfn: fastqc_summary_all.txt
+    type: output
+    stageOut: true
+    registerReplica: false
+- type: job
+  name: ex_fastqc_fail_run
+  id: ID0000018
+  arguments:
+  - fastqc_summary_all.txt
+  - fastqc_summary_final.txt
+  uses:
+  - lfn: fastqc_summary_final.txt
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: fastqc_summary_all.txt
+    type: input
+- type: job
+  name: ex_mlst_run
+  id: ID0000019
+  stdout: mlst_output.csv
+  arguments:
+  - SRR5160663_contigs.fasta
+  - SRR8385633_contigs.fasta
+  uses:
+  - lfn: SRR8385633_contigs.fasta
+    type: input
+  - lfn: SRR5160663_contigs.fasta
+    type: input
+  - lfn: mlst_output.csv
+    type: output
+    stageOut: true
+    registerReplica: true
+- type: job
+  name: ex_abricate_run
+  id: ID0000020
+  stdout: sabricate_vfdb_output.csv
+  arguments:
+  - vfdb
+  - SRR5160663_contigs.fasta
+  - SRR8385633_contigs.fasta
+  uses:
+  - lfn: sabricate_vfdb_output.csv
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: SRR5160663_contigs.fasta
+    type: input
+  - lfn: SRR8385633_contigs.fasta
+    type: input
+- type: job
+  name: ex_abricate_run
+  id: ID0000021
+  stdout: sabricate_argannot_output.csv
+  arguments:
+  - argannot
+  - SRR5160663_contigs.fasta
+  - SRR8385633_contigs.fasta
+  uses:
+  - lfn: SRR8385633_contigs.fasta
+    type: input
+  - lfn: SRR5160663_contigs.fasta
+    type: input
+  - lfn: sabricate_argannot_output.csv
+    type: output
+    stageOut: true
+    registerReplica: true
+- type: job
+  name: ex_abricate_run
+  id: ID0000022
+  stdout: sabricate_card_output.csv
+  arguments:
+  - card
+  - SRR5160663_contigs.fasta
+  - SRR8385633_contigs.fasta
+  uses:
+  - lfn: SRR8385633_contigs.fasta
+    type: input
+  - lfn: sabricate_card_output.csv
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: SRR5160663_contigs.fasta
+    type: input
+- type: job
+  name: ex_abricate_run
+  id: ID0000023
+  stdout: sabricate_ncbi_output.csv
+  arguments:
+  - ncbi
+  - SRR5160663_contigs.fasta
+  - SRR8385633_contigs.fasta
+  uses:
+  - lfn: sabricate_ncbi_output.csv
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: SRR8385633_contigs.fasta
+    type: input
+  - lfn: SRR5160663_contigs.fasta
+    type: input
+- type: job
+  name: ex_abricate_run
+  id: ID0000024
+  stdout: sabricate_plasmidfinder_output.csv
+  arguments:
+  - plasmidfinder
+  - SRR5160663_contigs.fasta
+  - SRR8385633_contigs.fasta
+  uses:
+  - lfn: SRR8385633_contigs.fasta
+    type: input
+  - lfn: SRR5160663_contigs.fasta
+    type: input
+  - lfn: sabricate_plasmidfinder_output.csv
+    type: output
+    stageOut: true
+    registerReplica: true
+- type: job
+  name: ex_abricate_run
+  id: ID0000025
+  stdout: sabricate_resfinder_output.csv
+  arguments:
+  - resfinder
+  - SRR5160663_contigs.fasta
+  - SRR8385633_contigs.fasta
+  uses:
+  - lfn: sabricate_resfinder_output.csv
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: SRR5160663_contigs.fasta
+    type: input
+  - lfn: SRR8385633_contigs.fasta
+    type: input
+- type: job
+  name: ex_roary_run
+  id: ID0000026
+  arguments:
+  - roary_output
+  - SRR5160663_prokka_output/SRR5160663.gff
+  - SRR8385633_prokka_output/SRR8385633.gff
+  uses:
+  - lfn: SRR5160663_prokka_output/SRR5160663.gff
+    type: input
+  - lfn: roary_output.tar.gz
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: roary_output/core_gene_alignment.aln
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: SRR8385633_prokka_output/SRR8385633.gff
+    type: input
+  profiles:
+    pegasus:
+      memory: '2048'
+- type: job
+  name: ex_cat
+  id: ID0000027
+  stdout: sistr_all.csv
+  arguments:
+  - SRR5160663_sistr_output.csv
+  - SRR8385633_sistr_output.csv
+  uses:
+  - lfn: SRR8385633_sistr_output.csv
+    type: input
+  - lfn: sistr_all.csv
+    type: output
+    stageOut: true
+    registerReplica: false
+  - lfn: SRR5160663_sistr_output.csv
+    type: input
+- type: job
+  name: ex_merge_sistr
+  id: ID0000028
+  arguments:
+  - sistr_all.csv
+  - sistr_all_merge.csv
+  uses:
+  - lfn: sistr_all_merge.csv
+    type: output
+    stageOut: true
+    registerReplica: true
+  - lfn: sistr_all.csv
+    type: input
+jobDependencies:
+- id: ID0000001
+  children:
+  - ID0000003
+  - ID0000002
+- id: ID0000002
+  children:
+  - ID0000017
+- id: ID0000003
+  children:
+  - ID0000004
+  - ID0000005
+- id: ID0000004
+  children:
+  - ID0000005
+- id: ID0000005
+  children:
+  - ID0000024
+  - ID0000006
+  - ID0000007
+  - ID0000008
+  - ID0000022
+  - ID0000020
+  - ID0000023
+  - ID0000025
+  - ID0000019
+  - ID0000021
+- id: ID0000006
+  children:
+  - ID0000026
+- id: ID0000008
+  children:
+  - ID0000027
+- id: ID0000009
+  children:
+  - ID0000010
+  - ID0000011
+- id: ID0000010
+  children:
+  - ID0000017
+- id: ID0000011
+  children:
+  - ID0000013
+  - ID0000012
+- id: ID0000012
+  children:
+  - ID0000013
+- id: ID0000013
+  children:
+  - ID0000024
+  - ID0000022
+  - ID0000020
+  - ID0000015
+  - ID0000025
+  - ID0000023
+  - ID0000014
+  - ID0000016
+  - ID0000019
+  - ID0000021
+- id: ID0000014
+  children:
+  - ID0000026
+- id: ID0000016
+  children:
+  - ID0000027
+- id: ID0000017
+  children:
+  - ID0000018
+- id: ID0000027
+  children:
+  - ID0000028
