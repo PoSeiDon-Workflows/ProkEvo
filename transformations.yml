@@ -2,12 +2,6 @@ x-pegasus:
   apiLang: python
 pegasus: 5.0.4
 transformations:
-- name: worker
-  namespace: pegasus
-  sites:
-  - name: local
-    type: stageable
-    pfn: https://download.pegasus.isi.edu/pegasus/5.1.0dev/pegasus-worker-5.1.0dev-x86_64_rhel_8.tar.gz
 - name: ex_abricate_run
   sites:
   - name: local
@@ -125,6 +119,3 @@ containers:
   type: singularity
   image: http://poseidon-data/~poseidon/containers/prokevo.sif
   image.site: local
-  profiles:
-    pegasus:
-      container.arguments: "--network fabric-testbed_default"
