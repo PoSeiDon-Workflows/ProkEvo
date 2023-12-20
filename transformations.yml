@@ -122,8 +122,8 @@ transformations:
     container: prokevo
 containers:
 - name: prokevo
-  type: docker
-  image: http://poseidon-data/~poseidon/ProkEvo/data/prokevo.tar
+  type: singularity
+  image: http://poseidon-data/~poseidon/ProkEvo/data/prokevo.sif
   image.site: local
   profiles:
     pegasus:
