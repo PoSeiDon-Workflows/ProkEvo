@@ -36,7 +36,7 @@ mkdir -p $3
 touch $3/contigs.fasta
 
 # spades.py "$@"
-spades.py -t 1 -1 $1 -2 $2 \
+spades.py -t 4 -1 $1 -2 $2 \
      --careful --cov-cutoff auto -o $3 --phred-offset 33 | tee spades-output.txt
 
 

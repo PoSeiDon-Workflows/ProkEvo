@@ -102,6 +102,9 @@ transformations:
     type: stageable
     pfn: http://poseidon-data/~poseidon/ProkEvo/scripts/spades.sh
     container: prokevo
+    profiles:
+      pegasus:
+        cores: "4"
 - name: ex_sra_run
   sites:
   - name: local
